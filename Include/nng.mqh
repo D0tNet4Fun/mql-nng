@@ -1,5 +1,10 @@
-enum nng_errno_enum {
-   NNG_SUCCESS = 0,
+//+------------------------------------------------------------------+
+//| NNG interop.                                                     |
+//+------------------------------------------------------------------+
+#property strict
+
+enum NngErrorCode {
+	NNG_SUCCESS = 0,
 	NNG_EINTR = 1,
 	NNG_ENOMEM = 2,
 	NNG_EINVAL = 3,
@@ -36,8 +41,8 @@ enum nng_errno_enum {
 	NNG_ETRANERR = 0x20000000
 };
 
-enum nng_flag_enum {
-   NNG_FLAG_NONE = 0,
+enum NngFlags {
+	NNG_FLAG_NONE = 0,
 	NNG_FLAG_ALLOC = 1, // Recv to allocate receive buffer.
 	NNG_FLAG_NONBLOCK = 2  // Non-blocking operations.
 };
@@ -48,20 +53,20 @@ enum nng_flag_enum {
 
 #import "nng.dll"
 // socket functions
-nng_errno_enum nng_close(nng_socket s);
+NngErrorCode nng_close(nng_socket s);
 // connection management
-nng_errno_enum nng_listen(nng_socket s, const char &url[], nng_listener &lp, nng_flag_enum flags);
-nng_errno_enum nng_dial(nng_socket s, const char &url[], nng_dialer &dp, nng_flag_enum flags);
+NngErrorCode nng_listen(nng_socket s, const char &url[], nng_listener &lp, NngFlags flags);
+NngErrorCode nng_dial(nng_socket s, const char &url[], nng_dialer &dp, NngFlags flags);
 // protocol functions
-nng_errno_enum nng_bus0_open(nng_socket &s);
-nng_errno_enum nng_pair0_open(nng_socket &s);
-nng_errno_enum nng_pair1_open(nng_socket &s);
-nng_errno_enum nng_pub0_open(nng_socket &s);
-nng_errno_enum nng_pull0_open(nng_socket &s);
-nng_errno_enum nng_push0_open(nng_socket &s);
-nng_errno_enum nng_rep0_open(nng_socket &s);
-nng_errno_enum nng_req0_open(nng_socket &s);
-nng_errno_enum nng_respondent0_open(nng_socket &s);
-nng_errno_enum nng_sub0_open(nng_socket &s);
-nng_errno_enum nng_surveyor0_open(nng_socket &s);
+NngErrorCode nng_bus0_open(nng_socket &s);
+NngErrorCode nng_pair0_open(nng_socket &s);
+NngErrorCode nng_pair1_open(nng_socket &s);
+NngErrorCode nng_pub0_open(nng_socket &s);
+NngErrorCode nng_pull0_open(nng_socket &s);
+NngErrorCode nng_push0_open(nng_socket &s);
+NngErrorCode nng_rep0_open(nng_socket &s);
+NngErrorCode nng_req0_open(nng_socket &s);
+NngErrorCode nng_respondent0_open(nng_socket &s);
+NngErrorCode nng_sub0_open(nng_socket &s);
+NngErrorCode nng_surveyor0_open(nng_socket &s);
 #import
