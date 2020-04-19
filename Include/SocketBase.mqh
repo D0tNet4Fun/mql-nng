@@ -15,6 +15,8 @@ protected:
    ~SocketBase();
 public:
    bool IsOpen();
+   bool Listen(const string endpoint);
+   bool Dial(const string endpoint);
 };
 
 SocketBase::SocketBase(OpenSocketFunc func)
@@ -43,3 +45,21 @@ SocketBase::~SocketBase()
 }
 
 bool SocketBase::IsOpen() { return m_socket > 0; }
+
+bool SocketBase::Listen(const string endpoint)
+{
+   char url[];
+   StringToCharArray(endpoint, url);
+   nng_listener listener;
+   NngErrorCode errorCode = nng_listen(m_socket, url, listener, NngFlags::NNG_FLAG_NONE);
+   return errorCode == NngErrorCode::NNG_SUCCESS;
+}
+
+bool SocketBase::Dial(const string endpoint)
+{
+   char url[];
+   StringToCharArray(endpoint, url);
+   nng_listener dialer;
+   NngErrorCode errorCode = nng_dial(m_socket, url, dialer, NngFlags::NNG_FLAG_NONE);
+   return errorCode == NngErrorCode::NNG_SUCCESS;
+}
