@@ -3,6 +3,13 @@
 //+------------------------------------------------------------------+
 #property strict
 
+#include "native.mqh"
+
+#define nng_socket uint
+#define nng_listener uint
+#define nng_dialer uint
+#define nng_msg intptr_t 
+
 enum NngErrorCode {
 	NNG_SUCCESS = 0,
 	NNG_EINTR = 1,
@@ -47,16 +54,21 @@ enum NngFlags {
 	NNG_FLAG_NONBLOCK = 2  // Non-blocking operations.
 };
 
-#define nng_socket uint
-#define nng_listener uint
-#define nng_dialer uint
-
 #import "nng.dll"
+
 // socket functions
 NngErrorCode nng_close(nng_socket s);
+
 // connection management
 NngErrorCode nng_listen(nng_socket s, const char &url[], nng_listener &lp, NngFlags flags);
 NngErrorCode nng_dial(nng_socket s, const char &url[], nng_dialer &dp, NngFlags flags);
+
+// message functions
+NngErrorCode nng_msg_alloc(nng_msg &msgp, size_t size);
+intptr_t nng_msg_body(nng_msg msg);
+void nng_msg_free(nng_msg msg);
+size_t nng_msg_len(nng_msg msg);
+
 // protocol functions
 NngErrorCode nng_bus0_open(nng_socket &s);
 NngErrorCode nng_pair0_open(nng_socket &s);
@@ -69,4 +81,5 @@ NngErrorCode nng_req0_open(nng_socket &s);
 NngErrorCode nng_respondent0_open(nng_socket &s);
 NngErrorCode nng_sub0_open(nng_socket &s);
 NngErrorCode nng_surveyor0_open(nng_socket &s);
+
 #import
