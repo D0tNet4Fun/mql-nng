@@ -1,3 +1,8 @@
+//+------------------------------------------------------------------+
+//|                                                      ProjectName |
+//|                                      Copyright 2020, CompanyName |
+//|                                       http://www.companyname.net |
+//+------------------------------------------------------------------+
 #property strict
 
 #include "nng.mqh"
@@ -14,9 +19,9 @@ typedef NngErrorCode (*OpenSocketFunc)(nng_socket&);
 
 /// Class that defines all the functions used to open sockets (nng_*_open).
 /// This is for internal use only.
-class SocketFactory
-{
-public:
-   EmitOpenSocketFunc(Pair0, pair0);
-   // todo add more
+class SocketFactory {
+  public:
+    EmitOpenSocketFunc(Pair0, pair0);
+    // todo add more
 };
+//+------------------------------------------------------------------+

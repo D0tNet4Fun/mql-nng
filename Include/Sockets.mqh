@@ -15,5 +15,8 @@ public:\
    TYPE##Socket() : SocketBase(SocketFactory::Open##TYPE##Socket) { }\
 };
 
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 EmitSocketClass(Pair0)
 // todo add more
