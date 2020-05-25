@@ -34,6 +34,8 @@ TestRunner *TestRunner::Current = NULL;
 void Assert(bool condition) {
     TestRunner *t = TestRunner::Current;
     t.testCount++;
-    if (!condition) t.testFailedCount++;
+    if (!condition) {
+        t.testFailedCount++;
+    }
 };
 //+------------------------------------------------------------------+

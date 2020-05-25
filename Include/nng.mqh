@@ -68,6 +68,8 @@ NngErrorCode nng_msg_alloc(nng_msg &msgp, size_t size);
 intptr_t nng_msg_body(nng_msg msg);
 void nng_msg_free(nng_msg msg);
 size_t nng_msg_len(nng_msg msg);
+NngErrorCode nng_sendmsg(nng_socket s, nng_msg msg, NngFlags flags);
+NngErrorCode nng_recvmsg(nng_socket s, nng_msg &msgp, NngFlags flags);
 
 // protocol functions
 NngErrorCode nng_bus0_open(nng_socket &s);
