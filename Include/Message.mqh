@@ -27,7 +27,7 @@ Message::Message(size_t size = 0)
     : _message(0) {
     if (size == 0) return;
     NngErrorCode errorCode = nng_msg_alloc(_message, size);
-    if (errorCode != NngErrorCode::NNG_SUCCESS) {
+    if (errorCode != NNG_SUCCESS) {
         Print("(!) Failed to allocate message");
     }
 }

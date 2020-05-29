@@ -29,7 +29,7 @@ class SocketBase {
 SocketBase::SocketBase(OpenSocketFunc func)
     : m_socket(0) {
     NngErrorCode errorCode = func(m_socket);
-    if (errorCode != NngErrorCode::NNG_SUCCESS) {
+    if (errorCode != NNG_SUCCESS) {
         PrintFormat("(!) Error opening socket: %s", EnumToString(errorCode));
     }
 }
@@ -41,7 +41,7 @@ SocketBase::~SocketBase() {
     if (!IsOpen()) return;
 
     NngErrorCode errorCode = nng_close(m_socket);
-    if (errorCode != NngErrorCode::NNG_SUCCESS) {
+    if (errorCode != NNG_SUCCESS) {
         PrintFormat("(!) Error closing socket: %s", EnumToString(errorCode));
     } else {
         m_socket = 0;
@@ -62,8 +62,8 @@ bool SocketBase::Listen(const string endpoint) {
     char url[];
     StringToCharArray(endpoint, url);
     nng_listener listener;
-    NngErrorCode errorCode = nng_listen(m_socket, url, listener, NngFlags::NNG_FLAG_NONE);
-    return errorCode == NngErrorCode::NNG_SUCCESS;
+    NngErrorCode errorCode = nng_listen(m_socket, url, listener, NNG_FLAG_NONE);
+    return errorCode == NNG_SUCCESS;
 }
 
 //+------------------------------------------------------------------+
@@ -73,16 +73,16 @@ bool SocketBase::Dial(const string endpoint) {
     char url[];
     StringToCharArray(endpoint, url);
     nng_listener dialer;
-    NngErrorCode errorCode = nng_dial(m_socket, url, dialer, NngFlags::NNG_FLAG_NONE);
-    return errorCode == NngErrorCode::NNG_SUCCESS;
+    NngErrorCode errorCode = nng_dial(m_socket, url, dialer, NNG_FLAG_NONE);
+    return errorCode == NNG_SUCCESS;
 }
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool SocketBase::SendMessage(Message &message) {
-    NngErrorCode errorCode = nng_sendmsg(m_socket, message.Unwrap(), NngFlags::NNG_FLAG_NONE);
-    if (errorCode == NngErrorCode::NNG_SUCCESS) {
+    NngErrorCode errorCode = nng_sendmsg(m_socket, message.Unwrap(), NNG_FLAG_NONE);
+    if (errorCode == NNG_SUCCESS) {
         // the message is now owned by socket
         message.Dispose();
         return true;
@@ -95,13 +95,13 @@ bool SocketBase::SendMessage(Message &message) {
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool SocketBase::TrySendMessage(Message &message) {
-    NngErrorCode errorCode = nng_sendmsg(m_socket, message.Unwrap(), NngFlags::NNG_FLAG_NONBLOCK);
+    NngErrorCode errorCode = nng_sendmsg(m_socket, message.Unwrap(), NNG_FLAG_NONBLOCK);
     switch (errorCode) {
-    case NngErrorCode::NNG_SUCCESS:
+    case NNG_SUCCESS:
         // the message is now owned by socket
         message.Dispose();
         return true;
-    case NngErrorCode::NNG_EAGAIN:
+    case NNG_EAGAIN:
         return false;
     default:
         Print("(!) Error trying to send message: %s", EnumToString(errorCode));
@@ -114,8 +114,8 @@ bool SocketBase::TrySendMessage(Message &message) {
 //+------------------------------------------------------------------+
 bool SocketBase::ReceiveMessage(Message &message) {
     nng_msg msg;
-    NngErrorCode errorCode = nng_recvmsg(m_socket, msg, NngFlags::NNG_FLAG_NONE);
-    if (errorCode == NngErrorCode::NNG_SUCCESS) {
+    NngErrorCode errorCode = nng_recvmsg(m_socket, msg, NNG_FLAG_NONE);
+    if (errorCode == NNG_SUCCESS) {
         message.Wrap(msg);
         return true;
     }
@@ -128,12 +128,12 @@ bool SocketBase::ReceiveMessage(Message &message) {
 //+------------------------------------------------------------------+
 bool SocketBase::TryReceiveMessage(Message &message) {
     nng_msg msg;
-    NngErrorCode errorCode = nng_recvmsg(m_socket, msg, NngFlags::NNG_FLAG_NONBLOCK);
+    NngErrorCode errorCode = nng_recvmsg(m_socket, msg, NNG_FLAG_NONBLOCK);
     switch (errorCode) {
-    case NngErrorCode::NNG_SUCCESS:
+    case NNG_SUCCESS:
         message.Wrap(msg);
         return true;
-    case NngErrorCode::NNG_EAGAIN:
+    case NNG_EAGAIN:
         return false;
     default:
         Print("(!) Error trying to send message: %s", EnumToString(errorCode));
