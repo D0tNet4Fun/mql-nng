@@ -15,6 +15,7 @@ class Message {
     Message();
     Message(nng_msg nngMsg);
     ~Message();
+    nng_msg Unwrap();
     bool Allocate(int size);
     size_t GetSize();
     intptr_t GetBody();
@@ -44,6 +45,13 @@ Message::Message(nng_msg nngMsg)
 //+------------------------------------------------------------------+
 Message::~Message() {
     Free();
+}
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+nng_msg Message::Unwrap() {
+    return _message;
 }
 
 //+------------------------------------------------------------------+

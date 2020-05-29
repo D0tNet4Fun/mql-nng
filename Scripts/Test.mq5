@@ -41,21 +41,17 @@ void Socket_SendReceiveMessage() {
     Pair0Socket client;
     client.Dial(endpoint);
 
-    Message msg(sizeof(MqlTick));
-    MqlTick tick = {0};
-    tick.ask = 10.0;
-    tick.bid = 9.5;
-    msg.SetTick(tick);
+    Message msg;
+    Assert(msg.SetData("hello"));
     Assert(client.SendMessage(msg));
 
     Message receivedMessage;
     Assert(server.ReceiveMessage(receivedMessage));
     size_t size = receivedMessage.GetSize();
-    Assert(size == sizeof(MqlTick));
-    MqlTick receivedTick = {0};
-    Assert(receivedMessage.GetTick(receivedTick));
-    Assert(receivedTick.ask == 10.0);
-    Assert(receivedTick.bid == 9.5);
+    Assert(6 == size);
+    string receivedString;
+    Assert(receivedMessage.GetData(receivedString));
+    Assert("hello" == receivedString);
 }
 
 //+------------------------------------------------------------------+
