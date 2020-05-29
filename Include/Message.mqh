@@ -6,60 +6,58 @@
 #include "Marshal.mqh"
 #include "nng.mqh"
 
-struct Message {
+class Message {
   private:
     nng_msg _message;
+    void Free();
   public:
-    Message(size_t size = 0);
+    Message();
+    Message(nng_msg nngMsg);
     ~Message();
-    void Dispose();
-    void Wrap(nng_msg &message);
-    nng_msg Unwrap();
+    bool Allocate(int size);
     size_t GetSize();
-    bool SetTick(MqlTick &value);
-    bool GetTick(MqlTick &result);
+    intptr_t GetBody();
+    bool SetData(string &in, uint codePage = CP_UTF8);
+    bool GetData(string &out, uint codePage = CP_UTF8);
+    void Release();
 };
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-Message::Message(size_t size = 0)
+Message::Message()
     : _message(0) {
-    if (size == 0) return;
-    NngErrorCode errorCode = nng_msg_alloc(_message, size);
-    if (errorCode != NNG_SUCCESS) {
-        Print("(!) Failed to allocate message");
-    }
+}
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+Message::Message(nng_msg nngMsg)
+    : _message(nngMsg) {
 }
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 Message::~Message() {
-    if(_message == 0) return;
+    Free();
+}
 
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool Message::Allocate(int size) {
+    if (size == 0) return false;
+    NngErrorCode errorCode = nng_msg_alloc(_message, size);
+    return errorCode == NNG_SUCCESS;
+}
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void Message::Free() {
+    if (_message == 0) return;
     nng_msg_free(_message);
-    _message = 0;
-}
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void Message::Wrap(nng_msg &message) {
-    _message = message;
-}
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-nng_msg Message::Unwrap() {
-    return _message;
-}
-
-//+------------------------------------------------------------------+
-//| Called when the socket accepts the message for delivery.         |
-//+------------------------------------------------------------------+
-void Message::Dispose() {
     _message = 0;
 }
 
@@ -73,20 +71,34 @@ size_t Message::GetSize() {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool Message::SetTick(MqlTick &value) {
-    intptr_t body = nng_msg_body(_message);
-    if (body == 0) return false;
-    Serialize(value, body, sizeof(MqlTick));
-    return true;
+intptr_t Message::GetBody() {
+    return nng_msg_body(_message);
 }
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool Message::GetTick(MqlTick &result) {
-    intptr_t body = nng_msg_body(_message);
+bool Message::SetData(string &in, uint codePage = CP_UTF8) {
+    int size = StringSizeInBytes(in, codePage);
+    if (!Allocate(size)) return false;
+    intptr_t body = GetBody();
     if (body == 0) return false;
-    Deserialize(body, result, sizeof(MqlTick));
-    return true;
+    return StringToPointer(in, body, codePage);
+}
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool Message::GetData(string &out, uint codePage = CP_UTF8) {
+    intptr_t body = GetBody();
+    if (body == 0) return false;
+    return PointerToString(body, out, codePage);
+}
+
+//+------------------------------------------------------------------+
+//| Called when the socket accepts the message for delivery.         |
+//+------------------------------------------------------------------+
+void Message::Release() {
+    _message = 0;
 }
 //+------------------------------------------------------------------+
