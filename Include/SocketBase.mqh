@@ -84,7 +84,7 @@ bool SocketBase::SendMessage(Message &message) {
     NngErrorCode errorCode = nng_sendmsg(m_socket, message.Unwrap(), NNG_FLAG_NONE);
     if (errorCode == NNG_SUCCESS) {
         // the message is now owned by socket
-        message.Dispose();
+        message.Release();
         return true;
     }
     Print("(!) Error sending message: %s", EnumToString(errorCode));
@@ -99,7 +99,7 @@ bool SocketBase::TrySendMessage(Message &message) {
     switch (errorCode) {
     case NNG_SUCCESS:
         // the message is now owned by socket
-        message.Dispose();
+        message.Release();
         return true;
     case NNG_EAGAIN:
         return false;
@@ -113,10 +113,10 @@ bool SocketBase::TrySendMessage(Message &message) {
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool SocketBase::ReceiveMessage(Message &message) {
-    nng_msg msg;
-    NngErrorCode errorCode = nng_recvmsg(m_socket, msg, NNG_FLAG_NONE);
+    nng_msg nngMsg;
+    NngErrorCode errorCode = nng_recvmsg(m_socket, nngMsg, NNG_FLAG_NONE);
     if (errorCode == NNG_SUCCESS) {
-        message.Wrap(msg);
+        message = new Message(nngMsg);
         return true;
     }
     Print("(!) Error trying to send message: %s", EnumToString(errorCode));
@@ -127,11 +127,11 @@ bool SocketBase::ReceiveMessage(Message &message) {
 //|                                                                  |
 //+------------------------------------------------------------------+
 bool SocketBase::TryReceiveMessage(Message &message) {
-    nng_msg msg;
-    NngErrorCode errorCode = nng_recvmsg(m_socket, msg, NNG_FLAG_NONBLOCK);
+    nng_msg nngMsg;
+    NngErrorCode errorCode = nng_recvmsg(m_socket, nngMsg, NNG_FLAG_NONBLOCK);
     switch (errorCode) {
     case NNG_SUCCESS:
-        message.Wrap(msg);
+        message = new Message(nngMsg);
         return true;
     case NNG_EAGAIN:
         return false;
