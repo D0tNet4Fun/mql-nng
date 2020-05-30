@@ -11,21 +11,6 @@
 
 TestRunner testRunner;
 
-class MqlTickSerializer : public JsonSerializerBase<MqlTick> {
-  public:
-    bool Serialize(const MqlTick &in, string &out) {
-        _json["ask"] = in.ask;
-        _json["bid"] = in.bid;
-        return _Serialize(out);
-    }
-    bool Deserialize(const string &in, MqlTick &out) {
-        if (!_Deserialize(in, out)) return false;
-        out.ask = _json["ask"].ToDbl();
-        out.bid = _json["bid"].ToDbl();
-        return true;
-    }
-};
-
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
