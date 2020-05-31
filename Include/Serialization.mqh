@@ -50,3 +50,23 @@ class MqlTickSerializer : public JsonSerializerBase<MqlTick> {
         return true;
     }
 };
+
+class MqlTradeRequestSerializer : public JsonSerializerBase<MqlTradeRequest> {
+  public:
+    bool Serialize(const MqlTradeRequest &in, string &out) {
+        _json["action"] = (int)in.action;
+        _json["symbol"] = in.symbol;
+        _json["volume"] = in.volume;
+        _json["type"] = (int)in.type;
+        return _Serialize(out);
+    }
+
+    bool Deserialize(const string &in, MqlTradeRequest &out) {
+        if (!_Deserialize(in, out)) return false;
+        out.action = (ENUM_TRADE_REQUEST_ACTIONS)_json["action"].ToInt();
+        out.symbol = _json["symbol"].ToStr();
+        out.volume = _json["volume"].ToDbl();
+        out.type = (ENUM_ORDER_TYPE)_json["type"].ToInt();
+        return true;
+    }
+};
