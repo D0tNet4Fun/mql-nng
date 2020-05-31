@@ -19,11 +19,20 @@ class Message {
     bool Allocate(int size);
     size_t GetSize();
     intptr_t GetBody();
-    bool SetData(const string in, uint codePage = CP_UTF8);
-    template <typename T> bool SetData(T &in, IJsonSerializer<T> *serializer);
-    bool GetData(string &out, uint codePage = CP_UTF8);
-    template <typename T> bool GetData(T &out, IJsonSerializer<T> *serializer);
     void Release();
+    bool SetData(const string in, uint codePage = CP_UTF8);
+    bool GetData(string &out, uint codePage = CP_UTF8);
+
+    template <typename T> bool SetData(T &in, IJsonSerializer<T> *serializer) {
+        string serialized = NULL;
+        if (!serializer.Serialize(in, serialized)) return false;
+        return SetData(serialized);
+    }
+    template <typename T> bool GetData(T &out, IJsonSerializer<T> *serializer) {
+        string serialized;
+        if (!GetData(serialized)) return false;
+        return serializer.Deserialize(serialized, out);
+    }
 };
 
 //+------------------------------------------------------------------+
@@ -100,30 +109,10 @@ bool Message::SetData(const string in, uint codePage = CP_UTF8) {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-template <typename T> 
-bool Message::SetData(T &in, IJsonSerializer<T> *serializer) {
-    string serialized = NULL;
-    if (!serializer.Serialize(in, serialized)) return false;
-    return SetData(serialized);
-}
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
 bool Message::GetData(string &out, uint codePage = CP_UTF8) {
     intptr_t body = GetBody();
     if (body == 0) return false;
     return PointerToString(body, out, codePage);
-}
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-template <typename T> 
-bool Message::GetData(T &out, IJsonSerializer<T> *serializer) {
-    string serialized;
-    if (!GetData(serialized)) return false;
-    return serializer.Deserialize(serialized, out);
 }
 
 //+------------------------------------------------------------------+
