@@ -23,6 +23,7 @@ class SocketFactory {
   public:
     EmitOpenSocketFunc(Pair0, pair0);
     EmitOpenSocketFunc(Publisher, pub0);
+    EmitOpenSocketFunc(Puller, pull0);
     // todo add more
 };
 //+------------------------------------------------------------------+
