@@ -25,10 +25,20 @@ class Message {
 
     template <typename T> bool SetData(T &in, IJsonSerializer<T> *serializer) {
         string serialized = NULL;
-        if (!serializer.Serialize(in, serialized)) return false;
+        serializer.Serialize(in, serialized);
+        return SetData(serialized);
+    }
+    template <typename T> bool SetData(T &in[], IJsonSerializer<T> *serializer) {
+        string serialized = NULL;
+        serializer.Serialize(in, serialized);
         return SetData(serialized);
     }
     template <typename T> bool GetData(T &out, IJsonSerializer<T> *serializer) {
+        string serialized;
+        if (!GetData(serialized)) return false;
+        return serializer.Deserialize(serialized, out);
+    }
+    template <typename T> bool GetData(T &out[], IJsonSerializer<T> *serializer) {
         string serialized;
         if (!GetData(serialized)) return false;
         return serializer.Deserialize(serialized, out);
