@@ -18,30 +18,29 @@ struct Person : PersonData {
 };
 
 class PersonSerializer : public JsonSerializerBase<Person> {
-    public:
-        bool Serialize(const Person& in, string &out) {
-            Serialize(_json, (PersonData)in);
-            CJAVal nestedJson;
-            Serialize(nestedJson, (PersonData)in.Sibling);
-            _json["sibling"].Set(nestedJson);
-            return _Serialize(out);
+  protected:
+    void Serialize(const Person &in, CJAVal &json) {
+        Serialize((PersonData)in, json);
+        if (in.Sibling.Age > 0) { // null check
+            CJAVal siblingJson;
+            Serialize(in.Sibling, siblingJson);
+            json["sibling"].Set(siblingJson);
         }
-        bool Deserialize(const string &in, Person &out) {
-            if (!_Deserialize(in, out)) return false;
-            Deserialize(_json, (PersonData)out);
-            CJAVal nestedJson = _json["sibling"];
-            Deserialize(nestedJson, (PersonData)out.Sibling);
-            return true;
-        }
-     private:
-        void Serialize(CJAVal &json, PersonData &in) {
-            json["name"] = in.Name;
-            json["age"] = in.Age;
-        }
-        void Deserialize(CJAVal &json, PersonData &out) {
-            out.Name = json["name"].ToStr();
-            out.Age = json["age"].ToInt();
-        }
+    }
+    void Deserialize(CJAVal &json, Person &out) {
+        Deserialize(json, (PersonData)out);
+        CJAVal siblingJson = json["sibling"];
+        Deserialize(siblingJson, (PersonData)out.Sibling);
+    }
+  private:
+    void Serialize(const PersonData &in, CJAVal &json) {
+        json["name"] = in.Name;
+        json["age"] = in.Age;
+    }
+    void Deserialize(CJAVal &json, PersonData &out) {
+        out.Name = json["name"].ToStr();
+        out.Age = (int)json["age"].ToInt(); 
+    }
 };
 
 TestRunner testRunner;
@@ -73,10 +72,41 @@ void SetPersonAndGetPerson() {
     Assert(outP1.Sibling.Age == p2.Age);
 };
 
+void SetPersonArrayAndGetPersonArray() {
+    Person p1;
+    p1.Name = "John";
+    p1.Age = 25;
+    Person p2;
+    p2.Name = "Tim";
+    p2.Age = 23;
+
+    Message msg;
+
+    PersonSerializer serializer;
+    IJsonSerializer<Person> *serializerPtr = GetPointer(serializer);
+
+    Person persons[2];
+    persons[0] = p1;
+    persons[1] = p2;
+
+    Assert(msg.SetData(persons, serializerPtr));
+
+    Person outPersons[];
+    Assert(msg.GetData(outPersons, serializerPtr));
+    Assert(2 == ArraySize(outPersons));
+    Person outP1 = outPersons[0];
+    Assert(outP1.Name == p1.Name);
+    Assert(outP1.Age == p1.Age);
+    Person outP2 = outPersons[1];
+    Assert(outP2.Name == p2.Name);
+    Assert(outP2.Age == p2.Age);
+};
+
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 void OnStart() {
     SetPersonAndGetPerson();
+    SetPersonArrayAndGetPersonArray();
 };
 //+------------------------------------------------------------------+
