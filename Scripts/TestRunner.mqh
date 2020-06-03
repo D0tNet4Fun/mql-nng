@@ -21,9 +21,7 @@ class TestRunner {
     ~TestRunner() {
         PrintFormat("Test run summary: %u / %u passed", testCount - testFailedCount, testCount);
         if (testFailedCount > 0) {
-            // fail at runtime by throwing an exception
-            Current = NULL;
-            Current.testCount++;
+            Alert(testFailedCount, " test(s) failed");
         }
     };
 };
