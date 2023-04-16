@@ -58,6 +58,30 @@ void PubSub_WhenSubscribedToAllTopics_ReceivesAllMessages() {
     Assert(data == "hello");
 }
 
+void PubSub_WhenMessageDoesNotHaveTopic_ReceivesMessage() {
+    // setup pub and sub sockets
+    string endpoint = "inproc://" + __FUNCTION__;
+    PublisherSocket pub;
+    Assert(pub.Listen(endpoint));
+    SubscriberSocket sub;
+    Assert(sub.Dial(endpoint));
+
+    // subscribe to all topics
+    Assert(sub.SubscribeAll());
+
+    // send message with no topic
+    Message msg;
+    Assert(msg.SetData("hello"));
+    Assert(pub.SendMessage(msg));
+
+    // try to receive message
+    Message receivedMsg;
+    Assert(sub.TryReceiveMessage(receivedMsg));
+    string data;
+    Assert(receivedMsg.GetData(data));
+    Assert(data == "hello");
+}
+
 void PubSub_WhenSubscribedToOneTopic_ReceivesFilteredMessages() {
     // setup pub and sub sockets
     string endpoint = "inproc://" + __FUNCTION__;
@@ -141,6 +165,7 @@ void PubSub_WhenMultipleSubscribers_TheyAllReceiveMessages() {
 void OnStart() {
     PubSub_WhenNotSubscribedToAnyTopic_DoesNotReceiveMessage();
     PubSub_WhenSubscribedToAllTopics_ReceivesAllMessages();
+    PubSub_WhenMessageDoesNotHaveTopic_ReceivesMessage
     PubSub_WhenSubscribedToOneTopic_ReceivesFilteredMessages();
     PubSub_WhenMultipleSubscribers_TheyAllReceiveMessages();
 }
