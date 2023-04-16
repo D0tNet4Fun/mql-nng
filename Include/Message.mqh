@@ -11,6 +11,7 @@ class Message {
   private:
     nng_msg _message;
     void Free();
+    uint _topicLength;
   public:
     Message();
     Message(nng_msg nngMsg);
@@ -20,8 +21,9 @@ class Message {
     size_t GetSize();
     intptr_t GetBody();
     void Release();
+    bool Insert(const string value, uint codePage = CP_UTF8);
     bool SetData(const string in, uint codePage = CP_UTF8);
-    bool GetData(string &out, uint codePage = CP_UTF8);
+    bool GetData(string &out, int offset = 0, uint codePage = CP_UTF8);
 
     template <typename T> bool SetData(T &in, IJsonSerializer<T> *serializer) {
         string serialized = NULL;
@@ -33,23 +35,28 @@ class Message {
         serializer.Serialize(in, serialized);
         return SetData(serialized);
     }
-    template <typename T> bool GetData(T &out, IJsonSerializer<T> *serializer) {
+    template <typename T> bool GetData(T &out, IJsonSerializer<T> *serializer, int offset = 0) {
         string serialized;
-        if (!GetData(serialized)) return false;
+        if (!GetData(serialized, offset)) return false;
         return serializer.Deserialize(serialized, out);
     }
-    template <typename T> bool GetData(T &out[], IJsonSerializer<T> *serializer) {
+    template <typename T> bool GetData(T &out[], IJsonSerializer<T> *serializer, int offset = 0) {
         string serialized;
-        if (!GetData(serialized)) return false;
+        if (!GetData(serialized, offset)) return false;
         return serializer.Deserialize(serialized, out);
     }
+
+    static int GetTopicLength(const string topic) {
+        return StringLen(topic) + 1;
+    }
+    string GetTopic();
 };
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 Message::Message()
-    : _message(0) {
+    : _message(0), _topicLength(0) {
 }
 
 //+------------------------------------------------------------------+
@@ -108,9 +115,20 @@ intptr_t Message::GetBody() {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
+bool Message::Insert(const string value, uint codePage = CP_UTF8) {
+    uchar valueChars[];
+    StringToCharArray(value, valueChars, 0, WHOLE_ARRAY, codePage);
+    size_t size = ArraySize(valueChars);
+    NngErrorCode errorCode = nng_msg_insert(_message, valueChars, size);
+    return errorCode == NNG_SUCCESS;
+}
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
 bool Message::SetData(const string in, uint codePage = CP_UTF8) {
     int size = StringSizeInBytes(in, codePage);
-    if (!Allocate(size)) return false;
+    if (!Allocate(_topicLength + size)) return false;
     intptr_t body = GetBody();
     if (body == 0) return false;
     return StringToPointer(in, body, codePage);
@@ -119,10 +137,21 @@ bool Message::SetData(const string in, uint codePage = CP_UTF8) {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-bool Message::GetData(string &out, uint codePage = CP_UTF8) {
+bool Message::GetData(string &out, int offset = 0, uint codePage = CP_UTF8) {
     intptr_t body = GetBody();
     if (body == 0) return false;
-    return PointerToString(body, out, codePage);
+    return PointerToString(body + offset, out, codePage);
+}
+
+//+------------------------------------------------------------------+
+//| Gets the first string from the message body that is supposed to be the message topic.
+//| Use only when the message is expected to have a topic.
+//+------------------------------------------------------------------+
+string Message::GetTopic() {
+    intptr_t body = GetBody();
+    string topic = NULL;
+    PointerToString(body, topic, CP_UTF8);
+    return topic;
 }
 
 //+------------------------------------------------------------------+

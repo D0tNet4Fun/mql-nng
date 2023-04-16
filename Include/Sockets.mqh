@@ -19,6 +19,5 @@ public:\
 //|                                                                  |
 //+------------------------------------------------------------------+
 EmitSocketClass(Pair0)
-EmitSocketClass(Publisher)
-EmitSocketClass(Puller);
+EmitSocketClass(Puller)
 // todo add more

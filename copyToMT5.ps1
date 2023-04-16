@@ -25,7 +25,7 @@ $deployRules = @(
 $deployRules | ForEach-Object {
     $rule = $_
     Get-ChildItem -Path $_.SourcePath | Foreach-Object {
-        $path = "$($rule.DestinationPath)\$_"
+        $path = "$($rule.DestinationPath)\$($_.Name)"
         $target = "$($rule.SourcePath)\$($_.Name)"
         if (Test-Path $path) {
             $(Get-Item $path).Delete()
