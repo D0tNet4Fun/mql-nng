@@ -9,10 +9,10 @@
 
 class SocketBase {
   private:
-    nng_socket m_socket;
   protected:
     SocketBase(OpenSocketFunc func);
     ~SocketBase();
+    nng_socket m_socket;
   public:
     bool IsOpen();
     bool Listen(const string endpoint);
@@ -119,7 +119,7 @@ bool SocketBase::ReceiveMessage(Message &message) {
         message = new Message(nngMsg);
         return true;
     }
-    Print("(!) Error trying to send message: %s", EnumToString(errorCode));
+    Print("(!) Error receiving message: %s", EnumToString(errorCode));
     return false;
 }
 
@@ -136,7 +136,7 @@ bool SocketBase::TryReceiveMessage(Message &message) {
     case NNG_EAGAIN:
         return false;
     default:
-        Print("(!) Error trying to send message: %s", EnumToString(errorCode));
+        Print("(!) Error trying to receive message: %s", EnumToString(errorCode));
         return false;
     }
 }

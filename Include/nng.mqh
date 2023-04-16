@@ -54,6 +54,10 @@ enum NngFlags {
     NNG_FLAG_NONBLOCK = 2  // Non-blocking operations.
 };
 
+// protocol options
+const string NNG_OPT_SUB_SUBSCRIBE = "sub:subscribe";
+const string NNG_OPT_SUB_UNSUBSCRIBE = "sub:unsubscribe";
+
 #import "nng.dll"
 
 // socket functions
@@ -65,6 +69,7 @@ NngErrorCode nng_dial(nng_socket s, const char &url[], nng_dialer &dp, NngFlags 
 
 // message functions
 NngErrorCode nng_msg_alloc(nng_msg &msgp, size_t size);
+NngErrorCode nng_msg_insert(nng_msg msg, const char &value[], size_t size);
 intptr_t nng_msg_body(nng_msg msg);
 void nng_msg_free(nng_msg msg);
 size_t nng_msg_len(nng_msg msg);
@@ -83,6 +88,9 @@ NngErrorCode nng_req0_open(nng_socket &s);
 NngErrorCode nng_respondent0_open(nng_socket &s);
 NngErrorCode nng_sub0_open(nng_socket &s);
 NngErrorCode nng_surveyor0_open(nng_socket &s);
+
+// options functions
+NngErrorCode nng_socket_set_string(nng_socket s, const char &option[], const char &value[]);
 
 #import
 //+------------------------------------------------------------------+
